@@ -1,0 +1,6 @@
+<launch>
+
+    <node pkg="turtlebot_highlevel_controller" type="turtlebot_highlevel_controller_node" name="turtlebot_highlevel_controller_node" output="screen">
+    </node>
+
+</launch>

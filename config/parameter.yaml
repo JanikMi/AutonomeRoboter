@@ -1,0 +1,3 @@
+subscriber_topic: /temperature
+subscriber_topic: /queue_size
+subscriber_topic: /topic
