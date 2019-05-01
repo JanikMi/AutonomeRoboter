@@ -1,4 +1,5 @@
 subscriber_topic: /temperature
 
 _subscriber/queue_size:  = 10
-_subscriber/topic:  "Scan"
+_subscriber/topic:  "/Scan"
+
