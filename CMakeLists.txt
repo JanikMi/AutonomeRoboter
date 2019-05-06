@@ -61,11 +61,10 @@ add_library(${PROJECT_NAME}_core
 
 ## Declare cpp executables
 add_executable(${PROJECT_NAME}
-  #src/${PROJECT_NAME}_node.cpp
+  src/${PROJECT_NAME}_node.cpp
   #src/TurtlebotHighlevelController.cpp
-  src/turtlebot_highlevel_controller_node.cpp
-  #src/listener.cpp
-  #src/test.cpp
+  #src/turtlebot_highlevel_controller_node.cpp
+
 )
 
 ## Add dependencies to exported targets, like ROS msgs or srvs
