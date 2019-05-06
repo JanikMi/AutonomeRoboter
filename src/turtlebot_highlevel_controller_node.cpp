@@ -7,49 +7,45 @@
 #include <ros/param.h>
 #include <iostream>
 
+sensor_msgs::LaserScan publisher_msg;
+unsigned int SizeOfArray;
+double ranges[5];
+
 void chatterCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-  std_msgs::Float32 smallest_range;
-  float all_distances[5];
-  float h = sizeof(msg->ranges);
-  smallest_range.data = msg -> ranges[1];
-
-  for (int i=1; i<h-1;i++)
+  SizeOfArray = sizeof(msg->ranges);
+  //msg->ranges->resize(SizeOfArray);
+  publisher_msg.ranges.resize(5);
+  for (int i=1; i<SizeOfArray-1;i++)
   {
-    if (msg->ranges[i]<smallest_range.data)
+    if (msg->ranges[i]<msg->range_min)
     {
-             //smallest_range.data;
       if (i < 3)
       {
-        all_distances[0] = 0;
-        all_distances[1] = 0;
+        publisher_msg.ranges[0] = 0;
+        publisher_msg.ranges[1] = 0;
       }
       else 
       {
-        all_distances[0] = msg->ranges[i-2];
-        all_distances[1] = msg->ranges[i-1];
+        publisher_msg.ranges[0] = msg->ranges[i-2];
+        publisher_msg.ranges[1] = msg->ranges[i-1];
       }
       if (i == 640)
       {
-        all_distances[3] = msg->ranges[i];
-        all_distances[4] = msg->ranges[i];
+        publisher_msg.ranges[3] = msg->ranges[i];
+        publisher_msg.ranges[4] = msg->ranges[i];
       }
       else 
       {
-        all_distances[3] = msg->ranges[i+1];
-        all_distances[4] = msg->ranges[i+2];
+        publisher_msg.ranges[3] = msg->ranges[i+1];
+        publisher_msg.ranges[4] = msg->ranges[i+2];
       }
-
-      all_distances[2] = msg->ranges[i];
-
-    }
-    ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", all_distances[0],all_distances[1],all_distances[2],all_distances[3],all_distances[4]);
+      publisher_msg.ranges[2] = msg->ranges[i];
+    }  
+    ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", publisher_msg.ranges[0],publisher_msg.ranges[1],publisher_msg.ranges[2],publisher_msg.ranges[3],publisher_msg.ranges[4]);
   }
-
-  
-
-
 }
+
 
 int main(int argc, char** argv)
 {
@@ -70,32 +66,26 @@ int main(int argc, char** argv)
   }
 
   ros::Subscriber subscriber = mynode.subscribe(topic, queue_size, chatterCallback);
-  ros::Publisher publischer = mynode.advertise<std_msgs::String>("Pub_scan", queue_size);
-  //ros::Subscriber subscriber = mynode.subscribe("/scan", 100, chatterCallback);
-  //turtlebot_highlevel_controller::TurtlebotHighlevelController TurtlebotHighlevelController(nodeHandle);
+  ros::Publisher publisher = mynode.advertise<sensor_msgs::LaserScan>("/Pub_scan", queue_size);
 
-int count = 0;
+    //ros::Rate r(1.0);
+    ros::Time scan_time = ros::Time::now();
+    
+    publisher_msg.header.stamp = scan_time;
+    publisher_msg.header.frame_id = "laser_frame";
+    // +/- 90°:
+    publisher_msg.angle_min = -1.57;
+    publisher_msg.angle_max = 1.57;
+    publisher_msg.angle_increment = 3.14 / 5;
+    //scan.time_increment = (1 / laser_frequency) / (num_readings);
+    publisher_msg.range_min = 0.0;
+    publisher_msg.range_max = 100.0;
 
-    std_msgs::String Pub_msg;
-
-    std::stringstream ss;
-    ss << "hello world " << count;
-    Pub_msg.data = ss.str();
-
-    ROS_INFO("%s", Pub_msg.data.c_str());
-
-    /**
-     * The publish() function is how you send messages. The parameter
-     * is the message object. The type of this object must agree with the type
-     * given as a template parameter to the advertise<>() call, as was done
-     * in the constructor above.
-     */
-    publischer.publish(Pub_msg);
-
-    ros::spinOnce();
+    publisher.publish(publisher_msg);
+    //ros::spinOnce();
 
     
-    ++count;
+   
 
 
 
