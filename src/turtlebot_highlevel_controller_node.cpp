@@ -70,8 +70,36 @@ int main(int argc, char** argv)
   }
 
   ros::Subscriber subscriber = mynode.subscribe(topic, queue_size, chatterCallback);
+  ros::Publisher publischer = mynode.advertise<std_msgs::String>("Pub_scan", queue_size);
   //ros::Subscriber subscriber = mynode.subscribe("/scan", 100, chatterCallback);
   //turtlebot_highlevel_controller::TurtlebotHighlevelController TurtlebotHighlevelController(nodeHandle);
+
+int count = 0;
+
+    std_msgs::String Pub_msg;
+
+    std::stringstream ss;
+    ss << "hello world " << count;
+    Pub_msg.data = ss.str();
+
+    ROS_INFO("%s", Pub_msg.data.c_str());
+
+    /**
+     * The publish() function is how you send messages. The parameter
+     * is the message object. The type of this object must agree with the type
+     * given as a template parameter to the advertise<>() call, as was done
+     * in the constructor above.
+     */
+    publischer.publish(Pub_msg);
+
+    ros::spinOnce();
+
+    
+    ++count;
+
+
+
+
 
   ros::spin();
   return 0;
