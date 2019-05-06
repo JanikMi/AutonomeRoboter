@@ -20,12 +20,12 @@ int main(int argc, char** argv)
 
   int queue_size;
   std::string topic;
-  if(!mynode.getParam("/_subscriber/queue_size", queue_size))
+  if(!mynode.getParam("/queue_size", queue_size))
   {
       ROS_ERROR_STREAM("queue_size wurde nicht gelesen.");
       return 0;
   }
-  if(!mynode.getParam("/_subscriber/topic", topic))
+  if(!mynode.getParam("/topic", topic))
   {
       ROS_ERROR_STREAM("topic wurde nicht gelesen.");
       return 0;
