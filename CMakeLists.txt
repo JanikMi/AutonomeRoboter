@@ -62,7 +62,7 @@ add_library(${PROJECT_NAME}_core
 ## Declare cpp executables
 add_executable(${PROJECT_NAME}
   src/${PROJECT_NAME}_node.cpp
-  #src/TurtlebotHighlevelController.cpp
+  src/TurtlebotHighlevelController.cpp
   #src/turtlebot_highlevel_controller_node.cpp
 
 )

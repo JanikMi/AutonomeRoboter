@@ -1,13 +1,23 @@
 #pragma once
 
-#include "/home/janik/catkin_ws/src/turtlebot_highlevel_controller/include/turtlebot_highlevel_controller/Algorithm.hpp"
+//#include "ros_package_template/Algorithm.hpp"
 
 // ROS
 #include <ros/ros.h>
 #include <sensor_msgs/Temperature.h>
 #include <std_srvs/Trigger.h>
 
-namespace turtlebot_highlevel_controller {
+#include "std_msgs/String.h"
+#include "std_msgs/Float32.h"
+#include "turtlebot_highlevel_controller/TurtlebotHighlevelController.hpp"
+#include "sensor_msgs/LaserScan.h"
+#include <sstream>
+#include <ros/param.h>
+#include <iostream>
+#include <vector>
+#include <time.h>
+
+namespace HighlevelController {
 
 /*!
  * Main class for the node to handle the ROS interfacing.
@@ -38,16 +48,20 @@ class TurtlebotHighlevelController
    * @param message the received message.
    */
   void topicCallback(const sensor_msgs::Temperature& message);
-
   /*!
    * ROS service server callback.
    * @param request the request of the service.
    * @param response the provided response.
    * @return true if successful, false otherwise.
    */
+
+  void chatterCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
+
+  /*
   bool serviceCallback(std_srvs::Trigger::Request& request,
                        std_srvs::Trigger::Response& response);
-
+  */
+ 
   //! ROS node handle.
   ros::NodeHandle& nodeHandle_;
 

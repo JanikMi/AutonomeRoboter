@@ -49,7 +49,7 @@
   </node>
   
   <!--  ***************** Parameter aus yaml file auf parameter server laden *****************  -->
-  <rosparam command="load" file="/home/janik/catkin_ws/src/turtlebot_highlevel_controller/config/parameter.yaml" />
+  <rosparam command="load" file="$(find turtlebot_highlevel_controller)/config/parameter.yaml" />
 
 <!--  ***************** eigene node starten *****************  -->
   <node pkg="turtlebot_highlevel_controller" type="turtlebot_highlevel_controller" name="turtlebot_highlevel_controller_node" output="screen"> 
@@ -57,7 +57,7 @@
 <!---->
 
 <!-- rviz -->
-<node type="rviz" name="rviz" pkg="rviz" args="-d /home/janik/catkin_ws/src/turtlebot_highlevel_controller/config/rviz_config.rviz">  </node>
+<node type="rviz" name="rviz" pkg="rviz" args="-d $(find turtlebot_highlevel_controller)/config/rviz_config.rviz">  </node>
 
 <!--<node type="rviz" name="rviz" pkg="rviz" args="-d $(find turtlebot_highlevel_controller)/config/rviz_config.rviz>  </node>-->
 </launch>
