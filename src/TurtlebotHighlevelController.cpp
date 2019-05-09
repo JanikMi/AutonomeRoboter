@@ -10,6 +10,10 @@
 #include "turtlebot_highlevel_controller/TurtlebotHighlevelController.hpp"
 #include <string>
 
+sensor_msgs::LaserScan publisher_msg;
+float SizeOfArray;
+double ranges[5];
+
 namespace HighlevelController {
 
 TurtlebotHighlevelController::TurtlebotHighlevelController(ros::NodeHandle& nodeHandle): nodeHandle_(nodeHandle)
@@ -28,8 +32,10 @@ TurtlebotHighlevelController::TurtlebotHighlevelController(ros::NodeHandle& node
   }
   
   ros::Subscriber subscriber = nodeHandle_.subscribe("/scan", queue_size, &TurtlebotHighlevelController::chatterCallback, this);
-  //ros::Publisher publisher = nodeHandle_.advertise<sensor_msgs::LaserScan>("/Pub_scan", queue_size);
-  
+  ros::Publisher publisher = nodeHandle_.advertise<sensor_msgs::LaserScan>("/Pub_scan", queue_size);
+
+  publisher.publish(publisher_msg);
+
   ROS_INFO("Successfully launched node.");
   ros::spin();
 }
@@ -49,9 +55,7 @@ void TurtlebotHighlevelController::topicCallback(const sensor_msgs::Temperature&
 
 void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-  sensor_msgs::LaserScan publisher_msg;
-  float SizeOfArray;
-  double ranges[5];
+
 
   SizeOfArray = msg->ranges.size();
   //msg->ranges->resize(SizeOfArray);
@@ -104,7 +108,8 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
 
   ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", AusgabeSubscriber[0],AusgabeSubscriber[1],AusgabeSubscriber[2],AusgabeSubscriber[3],AusgabeSubscriber[4]);
 
-  /*
+ 
+  
       //ros::Rate r(1.0);
     ros::Time scan_time = ros::Time::now();
     publisher_msg.header.stamp = scan_time;
@@ -116,7 +121,7 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
     //scan.time_increment = (1 / laser_frequency) / (num_readings);
     publisher_msg.range_min = 0.0;
     publisher_msg.range_max = 5.0;
-    */
+    
 }
 
 /*
