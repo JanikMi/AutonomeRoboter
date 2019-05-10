@@ -10,7 +10,7 @@
 #include "turtlebot_highlevel_controller/TurtlebotHighlevelController.hpp"
 #include <string>
 
-sensor_msgs::LaserScan publisher_msg;
+sensor_msgs::LaserScan Pub_scan;
 float SizeOfArray;
 double ranges[5];
 
@@ -31,13 +31,20 @@ TurtlebotHighlevelController::TurtlebotHighlevelController(ros::NodeHandle& node
       ros::requestShutdown();
   }
   
-  ros::Subscriber subscriber = nodeHandle_.subscribe("/scan", queue_size, &TurtlebotHighlevelController::chatterCallback, this);
-  ros::Publisher publisher = nodeHandle_.advertise<sensor_msgs::LaserScan>("/Pub_scan", queue_size);
+  ros::Subscriber subscriber = nodeHandle_.subscribe(topic, queue_size, &TurtlebotHighlevelController::chatterCallback, this);
+  ros::Publisher publisher = nodeHandle_.advertise<sensor_msgs::LaserScan>("Pub_scan", queue_size);
 
-  publisher.publish(publisher_msg);
+  //publisher.publish(Pub_scan);
+ros::Rate r(100); // 10 hz
+while (ros::ok())
+{
+  publisher.publish(Pub_scan);
+  ros::spinOnce();
+  r.sleep();
+}
 
-  ROS_INFO("Successfully launched node.");
-  ros::spin();
+ROS_INFO("Successfully launched node.");
+//ros::spin();
 }
 
 TurtlebotHighlevelController::~TurtlebotHighlevelController()
@@ -55,11 +62,9 @@ void TurtlebotHighlevelController::topicCallback(const sensor_msgs::Temperature&
 
 void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-
-
   SizeOfArray = msg->ranges.size();
   //msg->ranges->resize(SizeOfArray);
-  //publisher_msg.ranges.resize(5);
+  Pub_scan.ranges.resize(5);
   float AusgabeSubscriber[5];
   unsigned int index;
   float Min_Distanz = msg->ranges[0];
@@ -77,51 +82,60 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
   /**/
   if (index < 3)
       {
-        //publisher_msg.ranges[0] = 0;
-        //publisher_msg.ranges[1] = 0;
+        Pub_scan.ranges[0] = 0;
+        Pub_scan.ranges[1] = 0;
         AusgabeSubscriber[0] = 0;
         AusgabeSubscriber[1] = 0;
       }
       else 
       {
-        //publisher_msg.ranges[0] = msg->ranges[index-2];
-        //publisher_msg.ranges[1] = msg->ranges[index-1];
+        Pub_scan.ranges[0] = msg->ranges[index-2];
+        Pub_scan.ranges[1] = msg->ranges[index-1];
         AusgabeSubscriber[0] = msg->ranges[index-2];
         AusgabeSubscriber[1] = msg->ranges[index-1];
       }
       if (index == 640)
       {
-        //publisher_msg.ranges[3] = msg->ranges[index];
-        //publisher_msg.ranges[4] = msg->ranges[index];
+        Pub_scan.ranges[3] = msg->ranges[index];
+        Pub_scan.ranges[4] = msg->ranges[index];
         AusgabeSubscriber[3] = msg->ranges[index];
         AusgabeSubscriber[4] = msg->ranges[index];
       }
       else 
       {
-        //publisher_msg.ranges[3] = msg->ranges[index+1];
-        //publisher_msg.ranges[4] = msg->ranges[index+2];
+        Pub_scan.ranges[3] = msg->ranges[index+1];
+        Pub_scan.ranges[4] = msg->ranges[index+2];
         AusgabeSubscriber[3] = msg->ranges[index+1];
         AusgabeSubscriber[4] = msg->ranges[index+2];
       }
-      //publisher_msg.ranges[2] = msg->ranges[index];
+      Pub_scan.ranges[2] = msg->ranges[index];
       AusgabeSubscriber[2] = msg->ranges[index];
 
-  ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", AusgabeSubscriber[0],AusgabeSubscriber[1],AusgabeSubscriber[2],AusgabeSubscriber[3],AusgabeSubscriber[4]);
+  //ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", Pub_scan.ranges[0],Pub_scan.ranges[1],Pub_scan.ranges[2],Pub_scan.ranges[3],Pub_scan.ranges[4]);
+  ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", AusgabeSubscriber[0],AusgabeSubscriber[1],AusgabeSubscriber[2],AusgabeSubscriber[3],AusgabeSubscriber);
 
  
-  
+  /*
       //ros::Rate r(1.0);
     ros::Time scan_time = ros::Time::now();
     publisher_msg.header.stamp = scan_time;
-    publisher_msg.header.frame_id = "base_laser_link";
+    publisher_msg.header.frame_id = "base_laser_link";    
+ */   
+    Pub_scan.header.stamp = msg->header.stamp;
+    Pub_scan.header.frame_id = msg->header.frame_id;
+
     // +/- 90°:
-    publisher_msg.angle_increment = 0.00158417993225;
-    publisher_msg.angle_min = (index-2)*publisher_msg.angle_increment*360/2/3.1415;
-    publisher_msg.angle_max = (index+2)*publisher_msg.angle_increment*360/2/3.1415;
+    Pub_scan.angle_increment = 0.00158417993225;
+
+    Pub_scan.angle_min = msg->angle_min;
+    Pub_scan.angle_max = msg->angle_max;
+   // Pub_scan.angle_min = (index-2)*Pub_scan.angle_increment*360/2/3.1415;
+    //Pub_scan.angle_max = (index+2)*Pub_scan.angle_increment*360/2/3.1415;
+
     //scan.time_increment = (1 / laser_frequency) / (num_readings);
-    publisher_msg.range_min = 0.0;
-    publisher_msg.range_max = 5.0;
-    
+    Pub_scan.range_min = msg->range_min;
+    Pub_scan.range_max = msg->range_max;
+
 }
 
 /*
