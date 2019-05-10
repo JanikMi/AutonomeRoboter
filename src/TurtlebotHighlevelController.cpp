@@ -34,17 +34,17 @@ TurtlebotHighlevelController::TurtlebotHighlevelController(ros::NodeHandle& node
   ros::Subscriber subscriber = nodeHandle_.subscribe(topic, queue_size, &TurtlebotHighlevelController::chatterCallback, this);
   ros::Publisher publisher = nodeHandle_.advertise<sensor_msgs::LaserScan>("Pub_scan", queue_size);
 
-  //publisher.publish(Pub_scan);
-ros::Rate r(100); // 10 hz
-while (ros::ok())
-{
-  publisher.publish(Pub_scan);
-  ros::spinOnce();
-  r.sleep();
-}
+  ROS_INFO("Successfully launched node.");
 
-ROS_INFO("Successfully launched node.");
-//ros::spin();
+  ros::Rate r(100); // 10 hz
+  while (ros::ok())
+  {
+    publisher.publish(Pub_scan);
+    ros::spinOnce();
+    r.sleep();
+  }
+
+  ROS_INFO("Shutdown node");
 }
 
 TurtlebotHighlevelController::~TurtlebotHighlevelController()
@@ -77,8 +77,11 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
       index = i;
     } 
   }
-  //ROS_INFO("Minimale Distanz: [%f]", Min_Distanz) ;
 
+  if (index < 0) index = 0;
+  if (index > 640) index = 640;
+  ROS_INFO("Aktueller Index: [%i]", index);
+  
   /**/
   if (index < 3)
       {
@@ -127,10 +130,10 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
     // +/- 90°:
     Pub_scan.angle_increment = 0.00158417993225;
 
-    Pub_scan.angle_min = msg->angle_min;
-    Pub_scan.angle_max = msg->angle_max;
-   // Pub_scan.angle_min = (index-2)*Pub_scan.angle_increment*360/2/3.1415;
-    //Pub_scan.angle_max = (index+2)*Pub_scan.angle_increment*360/2/3.1415;
+    //Pub_scan.angle_min = msg->angle_min;
+    //Pub_scan.angle_max = msg->angle_max;
+    Pub_scan.angle_min = (index-2)*Pub_scan.angle_increment*360/2/3.1415;
+    Pub_scan.angle_max = (index+2)*Pub_scan.angle_increment*360/2/3.1415;
 
     //scan.time_increment = (1 / laser_frequency) / (num_readings);
     Pub_scan.range_min = msg->range_min;
