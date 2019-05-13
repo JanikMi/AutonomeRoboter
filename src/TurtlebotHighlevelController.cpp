@@ -131,10 +131,12 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
     //Pub_scan.angle_increment = 0.00158417993225;
     Pub_scan.angle_increment = msg->angle_increment;
 
-    Pub_scan.angle_min = msg->angle_min;
-    Pub_scan.angle_max = msg->angle_max;
-    //Pub_scan.angle_min = (index-2)*Pub_scan.angle_increment*360/2/3.1415;
-    //Pub_scan.angle_max = (index+2)*Pub_scan.angle_increment*360/2/3.1415;
+    //Pub_scan.angle_min = msg->angle_min;
+    //Pub_scan.angle_max = msg->angle_max;
+    //Pub_scan.angle_min = ((index-2)+640/2)*Pub_scan.angle_increment*360/2/3.1416;
+    //Pub_scan.angle_max = ((index+2)+640/2)*Pub_scan.angle_increment*360/2/3.1416;
+    Pub_scan.angle_min = msg->angle_min+(index-2)*Pub_scan.angle_increment;
+    Pub_scan.angle_max = msg->angle_max+(index+2)*Pub_scan.angle_increment;
 
     //scan.time_increment = (1 / laser_frequency) / (num_readings);
     Pub_scan.range_min = msg->range_min;
