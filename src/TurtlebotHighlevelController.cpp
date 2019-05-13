@@ -9,10 +9,14 @@
 #include <time.h>
 #include "turtlebot_highlevel_controller/TurtlebotHighlevelController.hpp"
 #include <string>
+#include <geometry_msgs/Twist.h>
 
 sensor_msgs::LaserScan Pub_scan;
 float SizeOfArray;
 double ranges[5];
+
+geometry_msgs::Twist base_cmd;
+geometry_msgs::Twist base_cmd_turn_left;
 
 namespace HighlevelController {
 
@@ -33,17 +37,21 @@ TurtlebotHighlevelController::TurtlebotHighlevelController(ros::NodeHandle& node
   
   ros::Subscriber subscriber = nodeHandle_.subscribe(topic, queue_size, &TurtlebotHighlevelController::chatterCallback, this);
   ros::Publisher publisher = nodeHandle_.advertise<sensor_msgs::LaserScan>("Pub_scan", queue_size);
+  ros::Publisher cmd_vel_pub_ = nodeHandle_.advertise<geometry_msgs::Twist>("cmd_vel", 10);
+
 
   ROS_INFO("Successfully launched node.");
 
-  ros::Rate r(100); // 10 hz
+  ros::Rate r(10); // 100 hz
   while (ros::ok())
   {
     publisher.publish(Pub_scan);
+
+    cmd_vel_pub_.publish(base_cmd);
+    
     ros::spinOnce();
     r.sleep();
   }
-
   ROS_INFO("Shutdown node");
 }
 
@@ -111,13 +119,12 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
         AusgabeSubscriber[3] = msg->ranges[index+1];
         AusgabeSubscriber[4] = msg->ranges[index+2];
       }
-      Pub_scan.ranges[2] = msg->ranges[index];
+      Pub_scan.ranges[2]   = msg->ranges[index];
       AusgabeSubscriber[2] = msg->ranges[index];
 
   //ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", Pub_scan.ranges[0],Pub_scan.ranges[1],Pub_scan.ranges[2],Pub_scan.ranges[3],Pub_scan.ranges[4]);
   ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", AusgabeSubscriber[0],AusgabeSubscriber[1],AusgabeSubscriber[2],AusgabeSubscriber[3],AusgabeSubscriber);
 
- 
   /*
       //ros::Rate r(1.0);
     ros::Time scan_time = ros::Time::now();
@@ -131,16 +138,20 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
     //Pub_scan.angle_increment = 0.00158417993225;
     Pub_scan.angle_increment = msg->angle_increment;
 
-    //Pub_scan.angle_min = msg->angle_min;
-    //Pub_scan.angle_max = msg->angle_max;
-    //Pub_scan.angle_min = ((index-2)+640/2)*Pub_scan.angle_increment*360/2/3.1416;
-    //Pub_scan.angle_max = ((index+2)+640/2)*Pub_scan.angle_increment*360/2/3.1416;
     Pub_scan.angle_min = msg->angle_min+(index-2)*Pub_scan.angle_increment;
     Pub_scan.angle_max = msg->angle_max+(index+2)*Pub_scan.angle_increment;
 
     //scan.time_increment = (1 / laser_frequency) / (num_readings);
     Pub_scan.range_min = msg->range_min;
     Pub_scan.range_max = msg->range_max;
+
+
+
+
+    // A2: Turtlebot per SW steuern:
+    base_cmd.linear.x = 0.5;
+    base_cmd.linear.y = 0.5;
+    base_cmd.angular.z = 0;
 
 }
 

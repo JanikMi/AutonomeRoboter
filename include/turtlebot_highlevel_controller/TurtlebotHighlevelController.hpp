@@ -1,7 +1,4 @@
 #pragma once
-
-//#include "ros_package_template/Algorithm.hpp"
-
 // ROS
 #include <ros/ros.h>
 #include <sensor_msgs/Temperature.h>
@@ -16,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <time.h>
+#include <geometry_msgs/Twist.h>
 
 namespace HighlevelController {
 
