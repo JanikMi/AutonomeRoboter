@@ -9,6 +9,7 @@
 #include <time.h>
 #include "turtlebot_highlevel_controller/TurtlebotHighlevelController.hpp"
 #include <string>
+#include <stdbool.h>
 #include <geometry_msgs/Twist.h>
 
 sensor_msgs::LaserScan Pub_scan;
@@ -152,11 +153,70 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
 
 
   geometry_msgs::Twist base_cmd;
-  base_cmd.linear.x = 1;
-  base_cmd.linear.y =0.6;
-  base_cmd.linear.z=0;
-  base_cmd.angular.x = 1.2;
+  /**/
+  int num = 0;
+  int numPillar = 0;
+  int FoundPillar = 0;
+  for (num = 0; num == 640; num ++)
+  {
+    if (msg->ranges[num] > msg->range_min)
+    {
+      FoundPillar = 1;
+      numPillar = num;
+    }
+  }
+  base_cmd.linear.x = 0.5;
+  base_cmd.linear.y = 0.0;
+  base_cmd.linear.z = 0.0;
+  base_cmd.angular.x = 0.0;
+  base_cmd.angular.y = 0.0;
+  base_cmd.angular.z = 0.0 + (Pub_scan.angle_max-320*msg->angle_increment) * 0.1;
+  ROS_INFO("FoundPillar, NumPillar, Pub_scan.angle_max: [%i], [%i], [%f]", FoundPillar, numPillar, Pub_scan.angle_max);
+  
+/*
+  int num = 0;
+  int numPillar = 0;
+  int FoundPillar = 0;
+  ROS_INFO("FoundPillar, NumPillar: [%i], [%i]", FoundPillar, numPillar);
 
+  //zuerst: drehen um die eigene Achste bis Säule gefunden wurde
+  while (FoundPillar == 0)
+  {
+    base_cmd.linear.x = 1.0;
+    base_cmd.linear.y = 0.0;
+    base_cmd.linear.z = 0.0;
+    base_cmd.angular.x = 0.0;
+    base_cmd.angular.y = 0.0;
+    base_cmd.angular.z = 1.0;
+    cmd_vel_pub_.publish(base_cmd);
+    publisher_.publish(Pub_scan);
+    for (num = 0; num == 640; num ++)
+    {
+      if ((msg->ranges[num] < msg->range_max) & (msg->ranges[num] > msg->range_min))
+      {
+        FoundPillar = 1;
+        numPillar = num;
+      }
+    }
+  }
+  ROS_INFO("FoundPillar, NumPillar: [%i], [%i]", FoundPillar, numPillar);
+
+  base_cmd.linear.x = 1.0;
+  base_cmd.linear.y = 0.0;
+  base_cmd.linear.z = 0.0;
+  base_cmd.angular.x = 0.0;
+  base_cmd.angular.y = 0.0;
+  base_cmd.angular.z = 1.2;
+
+
+  // anschließend turtlebot in Richtung Säule steuern mit P-Regler
+  base_cmd.linear.x = 0.5;
+  base_cmd.linear.y = 0.0;
+  base_cmd.angular.z = 1.0;
+
+  base_cmd.angular.z = msg->angle_min + numPillar * 5;
+
+*/
   
   //publisher.publish(base_cmd);
   cmd_vel_pub_.publish(base_cmd);
