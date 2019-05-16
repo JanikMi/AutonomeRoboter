@@ -72,6 +72,9 @@ class TurtlebotHighlevelController
   //! ROS service server.
   ros::ServiceServer serviceServer_;
 
+  ros::Publisher cmd_vel_pub_;
+  ros::Publisher publisher_;
+
   //! Algorithm computation object.
   //Algorithm algorithm_;
 };
