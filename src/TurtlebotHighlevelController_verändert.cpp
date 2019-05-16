@@ -144,14 +144,33 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
     //scan.time_increment = (1 / laser_frequency) / (num_readings);
     Pub_scan.range_min = msg->range_min;
     Pub_scan.range_max = msg->range_max;
+    
+    int num = 0;
+    bool FoundPillar = false;
+    //zuerst: drehen um die eigene Achste bis Säule gefunden wurde
+    while (!FoundPillar)
+    {
+      base_cmd.linear.x = 0.0;
+      base_cmd.linear.y = 0.0;
+      base_cmd.linear.z = 0.0;
+      base_cmd.angular.x = 0.0;
+      base_cmd.angular.y = 0.0;
+      base_cmd.angular.z = 1.0;
+      for (num = 0; num == 640; num ++)
+      {
+        if ((msg->ranges[num] < msg->range_max) & (msg->ranges[num] > msg->range_min))
+        {
+          FoundPillar = true;
+        }
+      }
+    }
 
-
-
-
-    // A2: Turtlebot per SW steuern:
+    // anschließend turtlebot in Richtung Säule steuern mit P-Regler
     base_cmd.linear.x = 0.5;
-    base_cmd.linear.y = 0.5;
-    base_cmd.angular.z = 0;
+    base_cmd.linear.y = 0.0;
+    base_cmd.angular.z = msg->angle_min + index * 5;
+
+
 
 }
 
