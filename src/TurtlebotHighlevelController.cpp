@@ -13,10 +13,8 @@
 #include <geometry_msgs/Twist.h>
 
 sensor_msgs::LaserScan Pub_scan;
-
 float SizeOfArray;
 double ranges[5];
-
 geometry_msgs::Twist base_cmd_turn_left;
 
 namespace HighlevelController {
@@ -40,19 +38,13 @@ TurtlebotHighlevelController::TurtlebotHighlevelController(ros::NodeHandle& node
   ros::Subscriber subscriber = nodeHandle_.subscribe(topic, queue_size, &TurtlebotHighlevelController::chatterCallback, this);
   publisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>("Pub_scan", queue_size);
   cmd_vel_pub_ = nodeHandle_.advertise<geometry_msgs::Twist>("cmd_vel", 100);
-   //ros::Publisher cmd_vel_pub_ = nodeHandle_.advertise<geometry_msgs::Twist>("cmd_vel", 10);
 
 
   ROS_INFO("Successfully launched node.");
 
-  ros::Rate r(10); // 100 hz
+  ros::Rate r(100); // 100 hz
   while (ros::ok())
   {
-   //publisher_.publish(Pub_scan);
-    
-   //cmd_vel_pub_.publish(base_cmd);
-    //cmd_vel_pub_.publish(msg1);`
-
     ros::spinOnce();
     r.sleep();
   }
@@ -74,9 +66,8 @@ void TurtlebotHighlevelController::topicCallback(const sensor_msgs::Temperature&
 
 void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-  //ros::Publisher cmd_vel_pub;
+
   SizeOfArray = msg->ranges.size();
-  //msg->ranges->resize(SizeOfArray);
   Pub_scan.ranges.resize(5);
   float AusgabeSubscriber[5];
   unsigned int index;
@@ -127,19 +118,16 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
       Pub_scan.ranges[2]   = msg->ranges[index];
       AusgabeSubscriber[2] = msg->ranges[index];
 
-  //ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", Pub_scan.ranges[0],Pub_scan.ranges[1],Pub_scan.ranges[2],Pub_scan.ranges[3],Pub_scan.ranges[4]);
   ROS_INFO("Distanzen: [%f], [%f], [%f], [%f], [%f]", AusgabeSubscriber[0],AusgabeSubscriber[1],AusgabeSubscriber[2],AusgabeSubscriber[3],AusgabeSubscriber);
 
   /*
-      //ros::Rate r(1.0);
     ros::Time scan_time = ros::Time::now();
     publisher_msg.header.stamp = scan_time;
     publisher_msg.header.frame_id = "base_laser_link";    
- */   
+  */   
     Pub_scan.header.stamp = msg->header.stamp;
     Pub_scan.header.frame_id = msg->header.frame_id;
 
-    // +/- 90°:
     //Pub_scan.angle_increment = 0.00158417993225;
     Pub_scan.angle_increment = msg->angle_increment;
 
@@ -150,76 +138,29 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
     Pub_scan.range_min = msg->range_min;
     Pub_scan.range_max = msg->range_max;
 
+  // Position der Säule:
+  float alpha;
+  float distance;
+  alpha = (msg->angle_min + index *Pub_scan.angle_increment)*360/2/3.1416;
+  distance = Pub_scan.ranges[2];
 
-
+  // Fahrt zur Säule:
   geometry_msgs::Twist base_cmd;
-  /**/
-  int num = 0;
-  int numPillar = 0;
-  int FoundPillar = 0;
-  for (num = 0; num == 640; num ++)
-  {
-    if (msg->ranges[num] > msg->range_min)
-    {
-      FoundPillar = 1;
-      numPillar = num;
-    }
-  }
   base_cmd.linear.x = 0.5;
   base_cmd.linear.y = 0.0;
   base_cmd.linear.z = 0.0;
   base_cmd.angular.x = 0.0;
   base_cmd.angular.y = 0.0; 
-  float z_coord = (((Pub_scan.ranges[numPillar])*Pub_scan.angle_increment)-0*Pub_scan.angle_increment) * 10.0;
-  base_cmd.angular.z = 0.0 + z_coord;
-  ROS_INFO("NumPillar, Pub_scan.angle_max, z_coord: [%i], [%f], [%f]", numPillar, Pub_scan.angle_max, z_coord);
-  
-/*
-  int num = 0;
-  int numPillar = 0;
-  int FoundPillar = 0;
-  ROS_INFO("FoundPillar, NumPillar: [%i], [%i]", FoundPillar, numPillar);
-
-  //zuerst: drehen um die eigene Achste bis Säule gefunden wurde
-  while (FoundPillar == 0)
+  if (distance < 5 && distance > 0)
   {
-    base_cmd.linear.x = 1.0;
-    base_cmd.linear.y = 0.0;
-    base_cmd.linear.z = 0.0;
-    base_cmd.angular.x = 0.0;
-    base_cmd.angular.y = 0.0;
-    base_cmd.angular.z = 1.0;
-    cmd_vel_pub_.publish(base_cmd);
-    publisher_.publish(Pub_scan);
-    for (num = 0; num == 640; num ++)
-    {
-      if ((msg->ranges[num] < msg->range_max) & (msg->ranges[num] > msg->range_min))
-      {
-        FoundPillar = 1;
-        numPillar = num;
-      }
-    }
+    base_cmd.angular.z = alpha * 0.1;
   }
-  ROS_INFO("FoundPillar, NumPillar: [%i], [%i]", FoundPillar, numPillar);
-
-  base_cmd.linear.x = 1.0;
-  base_cmd.linear.y = 0.0;
-  base_cmd.linear.z = 0.0;
-  base_cmd.angular.x = 0.0;
-  base_cmd.angular.y = 0.0;
-  base_cmd.angular.z = 1.2;
-
-
-  // anschließend turtlebot in Richtung Säule steuern mit P-Regler
-  base_cmd.linear.x = 0.5;
-  base_cmd.linear.y = 0.0;
-  base_cmd.angular.z = 1.0;
-
-  base_cmd.angular.z = msg->angle_min + numPillar * 5;
-
-*/
+  else
+  {
+    base_cmd.angular.z = 0.0;
+  }
+  ROS_INFO("alpha, distance, base_cmd.angular.z: [%f], [%f], [%f]", alpha, distance, base_cmd.angular.z);
   
-  //publisher.publish(base_cmd);
   cmd_vel_pub_.publish(base_cmd);
   publisher_.publish(Pub_scan);
 }
