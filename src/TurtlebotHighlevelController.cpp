@@ -169,9 +169,10 @@ void TurtlebotHighlevelController::chatterCallback(const sensor_msgs::LaserScan:
   base_cmd.linear.y = 0.0;
   base_cmd.linear.z = 0.0;
   base_cmd.angular.x = 0.0;
-  base_cmd.angular.y = 0.0;
-  base_cmd.angular.z = 0.0 + (Pub_scan.angle_max-320*msg->angle_increment) * 0.1;
-  ROS_INFO("FoundPillar, NumPillar, Pub_scan.angle_max: [%i], [%i], [%f]", FoundPillar, numPillar, Pub_scan.angle_max);
+  base_cmd.angular.y = 0.0; 
+  float z_coord = (((Pub_scan.ranges[numPillar])*Pub_scan.angle_increment)-0*Pub_scan.angle_increment) * 10.0;
+  base_cmd.angular.z = 0.0 + z_coord;
+  ROS_INFO("NumPillar, Pub_scan.angle_max, z_coord: [%i], [%f], [%f]", numPillar, Pub_scan.angle_max, z_coord);
   
 /*
   int num = 0;
